@@ -14,23 +14,51 @@
 
 #include "lander.h"
 
-void autopilot (void)
+vector3d drag_force(vector3d &v, vector3d &pos) {
+    double CdA = DRAG_COEF_LANDER * M_PI * LANDER_SIZE * LANDER_SIZE;
+    if(parachute_status==DEPLOYED) { CdA = (DRAG_COEF_LANDER * M_PI + DRAG_COEF_CHUTE * 20) * LANDER_SIZE * LANDER_SIZE; }
+    vector3d drag = (- 1.0 / 2)* CdA * atmospheric_density(pos) * v.abs2() * v.norm(); return drag; }
+
+void autopilot ( double Kh, double Kp, double Delta)
   // Autopilot to adjust the engine throttle, parachute and attitude control
 {
-  // INSERT YOUR CODE HERE
+    
+    // Adjust throttle-->
+    double e, h = position.abs(), v_rad = velocity * position.norm();
+    e = -(0.5 + Kh*h+ v_rad);
+    double P_out = Kp * e;
+    if (P_out < -Delta) { throttle = 0; }
+    else if(P_out > 1 - Delta) { throttle = 1; }
+    else { throttle = Delta + P_out; }
 }
 
-void numerical_dynamics (void)
-  // This is the function that performs the numerical integration to update the
-  // lander's pose. The time step is delta_t (global variable).
+void numerical_dynamics(void)
+// This is the function that performs the numerical integration to update the
+// lander's pose. The time step is delta_t (global variable).
 {
-  // INSERT YOUR CODE HERE
-
-  // Here we can apply an autopilot to adjust the thrust, parachute and attitude
-  if (autopilot_enabled) autopilot();
-
-  // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
-  if (stabilized_attitude) attitude_stabilization();
+    static vector3d previous_position;
+    bool verlet = true;
+    vector3d drag, grav, thrust, a, next_position;
+    double mass;
+    mass = UNLOADED_LANDER_MASS + FUEL_DENSITY * FUEL_CAPACITY * fuel;
+    grav = -GRAVITY * MARS_MASS * position.norm() / (position.abs2());
+    drag = drag_force(velocity, position);
+    thrust = thrust_wrt_world();
+    a = grav + (thrust + drag) / mass;
+    // Integrator select.
+    if (verlet==true) {
+        if (simulation_time == 0.0) { next_position = position + velocity * delta_t; velocity =velocity + (a * delta_t);}
+        else { next_position = (2 * position) - previous_position + (a * delta_t * delta_t);
+               velocity = (next_position - position) / delta_t;}
+        previous_position = position;
+        position = next_position;}
+    else{ velocity = velocity + a * delta_t;
+          next_position = position + velocity * delta_t;
+          position = next_position;}
+     // Here we can apply an autopilot to adjust the thrust, parachute and attitude
+    if (autopilot_enabled) autopilot(1,1,0.5);
+    // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
+    if (stabilized_attitude) attitude_stabilization();
 }
 
 void initialize_simulation (void)

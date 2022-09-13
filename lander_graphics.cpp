@@ -1693,7 +1693,7 @@ void reset_simulation (void)
   stabilized_attitude_angle = 0;
   throttle = 0.0;
   fuel = 1.0;
-
+  
   // Restore initial lander state
   initialize_simulation();
 

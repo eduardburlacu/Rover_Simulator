@@ -2,7 +2,6 @@
 // Version 1.11
 // Header file
 // Gabor Csanyi and Andrew Gee, August 2019
-
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation, to make use of it
 // for non-commercial purposes, provided that (a) its original authorship
@@ -30,6 +29,7 @@
 #include <fstream>
 #include <cmath>
 #include <cstdlib>
+#include <vector>
 
 // GLUT mouse wheel operations work under Linux only
 #if !defined (GLUT_WHEEL_UP)
@@ -110,6 +110,43 @@ public:
   friend ostream& operator << (ostream &out, const vector3d &v) { out << v.x << ' ' << v.y << ' ' << v.z; return out; }
   double x, y, z;
 private:
+};
+
+class trivector {
+public:
+	double x, y, z;
+	trivector() { x = 0.0; y = 0.0; z = 0.0;}
+	trivector(double cx, double cy, double cz) {
+		x = cx; y = cy; z = cz;
+	}
+	bool operator!=(trivector &u) {
+		if ((x=u.x) && (y=u.y) && (z=u.z)) {
+			return false;
+		}
+		else { return true; }
+	}
+
+	trivector operator* (const double &a) {
+		trivector s(a * x, a * y, a * z); return s;
+	}
+	double operator* (trivector &u) {
+		return x * u.x + y * u.y + z * u.z;
+	}
+	trivector operator+ (trivector &u){
+		trivector s(x+u.x,y+u.y,z+u.z); return s;
+	}
+	trivector operator- (trivector &u) {
+		trivector d(x - u.x, y - u.y, z - u.z); return d;
+	}
+	trivector operator^ (trivector &u) {
+		trivector cross = trivector(y*u.z-z*u.y, z*u.x-x*u.z, x*u.y- y*u.x); return cross;
+	}
+	double len2() {
+		return pow(x, 2) + pow(y, 2) + pow(z, 2);
+	}
+	double len() {
+		return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
+	}
 };
 
 // Data type for recording lander's previous positions
@@ -196,6 +233,7 @@ extern int stabilized_attitude_angle;
 #endif
 
 // Function prototypes
+vector3d drag_force(vector3d& v, vector3d& pos);
 void invert (double m[], double mout[]);
 void xyz_euler_to_matrix (vector3d ang, double m[]);
 vector3d matrix_to_xyz_euler (double m[]);
