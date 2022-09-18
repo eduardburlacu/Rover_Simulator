@@ -151,11 +151,19 @@ void initialize_simulation (void)
     delta_t = 0.1;
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = true;
-    autopilot_enabled = false;
+    autopilot_enabled = true;
     break;
 
   case 6:
-    break;
+    //geospatial orbit
+      position = vector3d( pow(GRAVITY * MARS_MASS * MARS_DAY * MARS_DAY /(4 * M_PI* M_PI), 1.0/ 3.0 ), 0.0, 0.0);
+      velocity = vector3d(0.0, sqrt(GRAVITY * MARS_MASS / position.abs()), 0.0);
+      orientation = vector3d(0.0, 90.0, 0.0);
+      delta_t = 0.1;
+      parachute_status = NOT_DEPLOYED;
+      stabilized_attitude = false;
+      autopilot_enabled = false;
+      break;
 
   case 7:
     break;
@@ -165,6 +173,5 @@ void initialize_simulation (void)
 
   case 9:
     break;
-
   }
 }
