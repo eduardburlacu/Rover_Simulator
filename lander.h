@@ -69,7 +69,7 @@
 #define LANDER_SIZE 1.0 // (m)
 #define UNLOADED_LANDER_MASS 100.0 // (kg)
 #define FUEL_CAPACITY 100.0 // (l)
-#define FUEL_RATE_AT_MAX_THRUST 0.5 // (l/s)
+#define FUEL_RATE_AT_MAX_THRUST 0.0 // (l/s)
 #define FUEL_DENSITY 1.0 // (kg/l)
 // MAX_THRUST, as defined below, is 1.5 * weight of fully loaded lander at surface
 #define MAX_THRUST (1.5 * (FUEL_DENSITY*FUEL_CAPACITY+UNLOADED_LANDER_MASS) * (GRAVITY*MARS_MASS/(MARS_RADIUS*MARS_RADIUS))) // (N)
@@ -112,42 +112,6 @@ public:
 private:
 };
 
-class trivector {
-public:
-	double x, y, z;
-	trivector() { x = 0.0; y = 0.0; z = 0.0;}
-	trivector(double cx, double cy, double cz) {
-		x = cx; y = cy; z = cz;
-	}
-	bool operator!=(trivector &u) {
-		if ((x=u.x) && (y=u.y) && (z=u.z)) {
-			return false;
-		}
-		else { return true; }
-	}
-
-	trivector operator* (const double &a) {
-		trivector s(a * x, a * y, a * z); return s;
-	}
-	double operator* (trivector &u) {
-		return x * u.x + y * u.y + z * u.z;
-	}
-	trivector operator+ (trivector &u){
-		trivector s(x+u.x,y+u.y,z+u.z); return s;
-	}
-	trivector operator- (trivector &u) {
-		trivector d(x - u.x, y - u.y, z - u.z); return d;
-	}
-	trivector operator^ (trivector &u) {
-		trivector cross = trivector(y*u.z-z*u.y, z*u.x-x*u.z, x*u.y- y*u.x); return cross;
-	}
-	double len2() {
-		return pow(x, 2) + pow(y, 2) + pow(z, 2);
-	}
-	double len() {
-		return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
-	}
-};
 
 // Data type for recording lander's previous positions
 struct track_t {
@@ -200,6 +164,7 @@ bool do_texture = true;
 unsigned long throttle_buffer_length, throttle_buffer_pointer;
 double *throttle_buffer = NULL;
 unsigned long long time_program_started;
+ofstream file;
 
 // Lander state - the visualization routines use velocity_from_positions, so not sensitive to 
 // any errors in the velocity update in numerical_dynamics
@@ -223,12 +188,13 @@ GLfloat straight_on[] = { 0.0, 0.0, 1.0, 0.0 };
 #else // extern declarations of those global variables used in lander.cpp
 
 extern bool stabilized_attitude, autopilot_enabled;
-extern double delta_t, simulation_time, throttle, fuel;
+extern double delta_t, simulation_time, throttle, fuel, altitude;
 extern unsigned short scenario;
 extern string scenario_description[];
 extern vector3d position, orientation, velocity;
 extern parachute_status_t parachute_status;
 extern int stabilized_attitude_angle;
+extern ofstream file;
 
 #endif
 

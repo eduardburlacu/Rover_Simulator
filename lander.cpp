@@ -22,20 +22,23 @@ vector3d drag_force(vector3d &v, vector3d &pos) {
 void autopilot ( double Kh, double Kp, double Delta)
   // Autopilot to adjust the engine throttle, parachute and attitude control
 {
-    
+    stabilized_attitude = true;
     // Adjust throttle-->
-    double e, h = position.abs(), v_rad = velocity * position.norm();
-    e = -(0.5 + Kh*h+ v_rad);
+    double e, h = position.abs()-MARS_RADIUS, v_rad = velocity * position.norm();
+    file << simulation_time << ',' << h << ','<<v_rad<<endl;
+    e = -(0.5 + Kh*h+ v_rad); //error term
     double P_out = Kp * e;
     if (P_out < -Delta) { throttle = 0; }
     else if(P_out > 1 - Delta) { throttle = 1; }
     else { throttle = Delta + P_out; }
+
 }
 
 void numerical_dynamics(void)
 // This is the function that performs the numerical integration to update the
 // lander's pose. The time step is delta_t (global variable).
 {
+    
     static vector3d previous_position;
     bool verlet = true;
     vector3d drag, grav, thrust, a, next_position;
@@ -56,7 +59,7 @@ void numerical_dynamics(void)
           next_position = position + velocity * delta_t;
           position = next_position;}
      // Here we can apply an autopilot to adjust the thrust, parachute and attitude
-    if (autopilot_enabled) autopilot(1,1,0.5);
+    if (autopilot_enabled) autopilot(0.01,69.0,0.6);
     // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
     if (stabilized_attitude) attitude_stabilization();
 }
@@ -103,8 +106,8 @@ void initialize_simulation (void)
     orientation = vector3d(0.0, 0.0, 90.0);
     delta_t = 0.1;
     parachute_status = NOT_DEPLOYED;
-    stabilized_attitude = true;
-    autopilot_enabled = false;
+    stabilized_attitude = false;
+    autopilot_enabled = true;
     break;
 
   case 2:
@@ -137,7 +140,7 @@ void initialize_simulation (void)
     delta_t = 0.1;
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
-    autopilot_enabled = false;
+    autopilot_enabled = true;
     break;
 
   case 5:

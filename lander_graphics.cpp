@@ -1679,6 +1679,11 @@ void update_lander_state (void)
   // Mechanical dynamics
   numerical_dynamics();
 
+
+  // Enter data in file !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  
+  
   // Refresh the visualization
   update_visualization();
 }
@@ -2067,7 +2072,9 @@ int main (int argc, char* argv[])
   // Initializes GLUT windows and lander state, then enters GLUT main loop
 {
   int i;
-
+  
+  file.open("lander_phase_space.csv");
+  file << "Time," << "Altitude," << "Velocity"<<endl;
   // Main GLUT window
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
