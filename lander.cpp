@@ -38,7 +38,6 @@ void numerical_dynamics(void)
 // This is the function that performs the numerical integration to update the
 // lander's pose. The time step is delta_t (global variable).
 {
-    
     static vector3d previous_position;
     bool verlet = true;
     vector3d drag, grav, thrust, a, next_position;
@@ -140,7 +139,7 @@ void initialize_simulation (void)
     delta_t = 0.1;
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
-    autopilot_enabled = true;
+    autopilot_enabled = false;
     break;
 
   case 5:
