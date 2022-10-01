@@ -57,8 +57,10 @@ void numerical_dynamics(void)
     else{ velocity = velocity + a * delta_t;
           next_position = position + velocity * delta_t;
           position = next_position;}
-     // Here we can apply an autopilot to adjust the thrust, parachute and attitude
-    if (autopilot_enabled) autopilot(0.01,69.0,0.6);
+    // Here we can apply an autopilot to adjust the thrust, parachute and attitude
+    //autopilot ( double Kh, double Kp, double Delta)
+    if (autopilot_enabled && scenario == 1) autopilot(0.01,69.3,0.6);
+    else if (autopilot_enabled && scenario == 3) autopilot(0.00518, 69.3, 0.6);
     // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
     if (stabilized_attitude) attitude_stabilization();
 }
@@ -80,7 +82,7 @@ void initialize_simulation (void)
   scenario_description[3] = "polar launch at escape velocity (but drag prevents escape)";
   scenario_description[4] = "elliptical orbit that clips the atmosphere and decays";
   scenario_description[5] = "descent from 200km";
-  scenario_description[6] = "";
+  scenario_description[6] = "geosychronous orbit";
   scenario_description[7] = "";
   scenario_description[8] = "";
   scenario_description[9] = "";
@@ -128,7 +130,7 @@ void initialize_simulation (void)
     delta_t = 0.1;
     parachute_status = NOT_DEPLOYED;
     stabilized_attitude = false;
-    autopilot_enabled = false;
+    autopilot_enabled = true;
     break;
 
   case 4:
