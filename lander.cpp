@@ -61,6 +61,7 @@ void numerical_dynamics(void)
     //autopilot ( double Kh, double Kp, double Delta)
     if (autopilot_enabled && scenario == 1) autopilot(0.01,69.3,0.6);
     else if (autopilot_enabled && scenario == 3) autopilot(0.00518, 69.3, 0.6);
+    else if (autopilot_enabled && scenario == 5) autopilot(0.004, 69.3, 0.6);
     // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
     if (stabilized_attitude) attitude_stabilization();
 }

@@ -2073,7 +2073,7 @@ int main (int argc, char* argv[])
 {
   int i;
   
-  file.open("lander_phase_space.csv");
+  file.open("lander_phase_space_1.csv");
   file << "Time," << "Altitude," << "Velocity"<<endl;
   // Main GLUT window
   glutInit(&argc, argv);
