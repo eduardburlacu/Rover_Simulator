@@ -19,19 +19,24 @@ vector3d drag_force(vector3d &v, vector3d &pos) {
     if(parachute_status==DEPLOYED) { CdA = (DRAG_COEF_LANDER * M_PI + DRAG_COEF_CHUTE * 20) * LANDER_SIZE * LANDER_SIZE; }
     vector3d drag = (- 1.0 / 2)* CdA * atmospheric_density(pos) * v.abs2() * v.norm(); return drag; }
 
-void autopilot ( double Kh, double Kp, double Delta)
+void autopilot ( double Kh, double Kp, double Delta, double mass)
   // Autopilot to adjust the engine throttle, parachute and attitude control
 {
     stabilized_attitude = true;
     // Adjust throttle-->
-    double e, h = position.abs()-MARS_RADIUS, v_rad = velocity * position.norm();
+    double e, h = position.abs()-MARS_RADIUS, v_rad = velocity * position.norm(), target_altitude=500.0;
+    double R0 = target_altitude + MARS_RADIUS;
     file << simulation_time << ',' << h << ','<<v_rad<<endl;
     e = -(0.5 + Kh*h+ v_rad); //error term
     double P_out = Kp * e;
-    if (P_out < -Delta) { throttle = 0; }
-    else if(P_out > 1 - Delta) { throttle = 1; }
-    else { throttle = Delta + P_out; }
-
+    if (scenario == 7 || scenario == 8 || scenario == 9) {
+        throttle = GRAVITY * MARS_MASS * mass / (R0 * R0) / MAX_THRUST;
+    }
+    else {
+        if (P_out < -Delta) { throttle = 0; }
+        else if (P_out > 1 - Delta) { throttle = 1; }
+        else { throttle = Delta + P_out; }
+    }
 }
 
 void numerical_dynamics(void)
@@ -59,9 +64,9 @@ void numerical_dynamics(void)
           position = next_position;}
     // Here we can apply an autopilot to adjust the thrust, parachute and attitude
     //autopilot ( double Kh, double Kp, double Delta)
-    if (autopilot_enabled && scenario == 1) autopilot(0.01,69.3,0.6);
-    else if (autopilot_enabled && scenario == 3) autopilot(0.00518, 69.3, 0.6);
-    else if (autopilot_enabled && scenario == 5) autopilot(0.004, 69.3, 0.6);
+    if (autopilot_enabled && (scenario == 1 || scenario == 7 || scenario==8 || scenario == 9)) autopilot(0.01,69.3,0.6, mass);
+    else if (autopilot_enabled && scenario == 3) autopilot(0.00518, 69.3, 0.6, mass);
+    else if (autopilot_enabled && scenario == 5) autopilot(0.004, 69.3, 0.6, mass);
     // Here we can apply 3-axis stabilization to ensure the base is always pointing downwards
     if (stabilized_attitude) attitude_stabilization();
 }
@@ -168,12 +173,36 @@ void initialize_simulation (void)
       break;
 
   case 7:
-    break;
+      // a descent from rest at 500m altitude
+      position = vector3d(0.0, -(MARS_RADIUS + 500.0), 0.0);
+      velocity = vector3d(0.0, 0.0, 0.0);
+      orientation = vector3d(0.0, 0.0, 90.0);
+      delta_t = 0.01;
+      parachute_status = NOT_DEPLOYED;
+      stabilized_attitude = false;
+      autopilot_enabled = true;
+      break;
 
   case 8:
-    break;
+      // a descent from rest at 510m altitude
+      position = vector3d(0.0, -(MARS_RADIUS + 510.0), 0.0);
+      velocity = vector3d(0.0, 0.0, 0.0);
+      orientation = vector3d(0.0, 0.0, 90.0);
+      delta_t = 0.01;
+      parachute_status = NOT_DEPLOYED;
+      stabilized_attitude = false;
+      autopilot_enabled = true;
+      break;
 
   case 9:
-    break;
+      // a descent from rest at 700m altitude
+      position = vector3d(0.0, -(MARS_RADIUS + 700.0), 0.0);
+      velocity = vector3d(0.0, 0.0, 0.0);
+      orientation = vector3d(0.0, 0.0, 90.0);
+      delta_t = 0.01;
+      parachute_status = NOT_DEPLOYED;
+      stabilized_attitude = false;
+      autopilot_enabled = true;
+      break;
   }
 }
