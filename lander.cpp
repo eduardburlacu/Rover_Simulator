@@ -30,7 +30,12 @@ void autopilot ( double Kh, double Kp, double Delta, double mass)
     e = -(0.5 + Kh*h+ v_rad); //error term
     double P_out = Kp * e;
     if (scenario == 7 || scenario == 8 || scenario == 9) {
+
+        bool derivate_tuning= true; 
+        double kp=0.01,kd=0.01;//Controller addon.
         throttle = GRAVITY * MARS_MASS * mass / (R0 * R0) / MAX_THRUST;
+        if (derivate_tuning) { throttle = throttle + kp * (target_altitude - h) - kd * v_rad; }
+        else { throttle = throttle + kp * (target_altitude - h);}
     }
     else {
         if (P_out < -Delta) { throttle = 0; }
