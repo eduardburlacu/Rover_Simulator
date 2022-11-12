@@ -30,9 +30,8 @@ void autopilot ( double Kh, double Kp, double Delta, double mass)
     e = -(0.5 + Kh*h+ v_rad); //error term
     double P_out = Kp * e;
     if (scenario == 7 || scenario == 8 || scenario == 9) {
-
         bool derivate_tuning= true; 
-        double kp=0.01,kd=0.01;//Controller addon.
+        double kp=0.00906,kd=0.178;//Controller addon.
         throttle = GRAVITY * MARS_MASS * mass / (R0 * R0) / MAX_THRUST;
         if (derivate_tuning) { throttle = throttle + kp * (target_altitude - h) - kd * v_rad; }
         else { throttle = throttle + kp * (target_altitude - h);}
@@ -55,7 +54,13 @@ void numerical_dynamics(void)
     mass = UNLOADED_LANDER_MASS + FUEL_DENSITY * FUEL_CAPACITY * fuel;
     grav = -GRAVITY * MARS_MASS * position.norm() / (position.abs2());
     drag = drag_force(velocity, position);
-    thrust = thrust_wrt_world();
+    if (scenario == 7 || scenario == 8 || scenario == 9) {
+        thrust = thrust_wrt_world() + 100.0 * cos(0.1 * simulation_time) * position.norm();
+    }
+    else {
+        thrust = thrust_wrt_world();
+    }
+    thrust = thrust_wrt_world()+ 100.0 * cos(0.1*simulation_time)* position.norm();
     a = grav + (thrust + drag) / mass;
     // Integrator select.
     if (verlet==true) {
